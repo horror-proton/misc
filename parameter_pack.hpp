@@ -33,6 +33,8 @@ template<size_t N, typename ...Ts>
 using parameter_pack_Nth_t = typename parameter_pack_Nth<N, Ts...>::type;
 
 
+// TODO: Use constexpr function instead of class to deduct integer type?
+
 template<size_t N, typename IntT, IntT ...Ints>
 struct parameter_pack_Nth_integer {
     static_assert(sizeof...(Ints) /* always false */, "integer parameter pack index out of range");
@@ -48,6 +50,8 @@ struct parameter_pack_Nth_integer<0, IntT, First, Rest...>
         : integral_constant<IntT, First> {
 };
 
+template<size_t N, typename IntT, IntT ...Ints>
+static constexpr IntT parameter_pack_Nth_integer_v = parameter_pack_Nth_integer<N, IntT, Ints...>::value;
 
 template<size_t N, typename Seq>
 struct integer_sequence_Nth;
@@ -57,8 +61,13 @@ struct integer_sequence_Nth<N, IntSeq<IntT, Ints...>>
         : integral_constant<IntT, parameter_pack_Nth_integer<N, IntT, Ints...>::value> {
 };
 
+template<size_t N, typename Seq>
+static constexpr auto integer_sequence_Nth_v = integer_sequence_Nth<N, Seq>::value;
+
+
+
 template<typename Func, template<typename T, T...> class IntSeq, typename IntT, IntT ...Ints>
-void integer_sequence_for_each(IntSeq<IntT, Ints...>, Func) {
+constexpr void integer_sequence_for_each(IntSeq<IntT, Ints...>, Func) {
     (Func{}(Ints), ...);
 }
 
