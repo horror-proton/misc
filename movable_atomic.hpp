@@ -1,4 +1,4 @@
-//! Provide copy constructor and copy assignment for atomic types.
+//! Provide copy constructor and copy assignment for atomic types, allowing them to be stored in containers like `std::vector`.
 
 #pragma once
 
