@@ -31,6 +31,16 @@ public:
 
     constexpr const scalar_type &operator[](size_t n) const { return m_storage[n]; }
 
+private:
+
+    storage_type m_storage{};
+
+public: // ADLs
+
+    friend constexpr size_t size(const euclidean_vector &) {
+        return dimension;
+    }
+
     template<size_t N>
     friend constexpr std::enable_if_t<N < dimension, const scalar_type &> get(const euclidean_vector &v) {
         using std::get;
@@ -54,39 +64,45 @@ public:
         using std::get;
         return get<N>(v.m_storage);
     }
-
-private:
-    storage_type m_storage{};
 };
 
 namespace detail {
 
 template<typename Op, typename Vector, size_t ...I>
-constexpr
-Vector euclidean_vector_binary_operator_impl(const Vector &lhs, const Vector &rhs, Op, std::index_sequence<I...>) {
+constexpr Vector
+euclidean_vector_unary_operator_impl(
+        const Vector &value, std::index_sequence<I...>, Op) {
+    return Vector{Op{}(get<I>(value)) ...};
+}
+
+template<typename Op, typename Vector, size_t ...I>
+constexpr Vector
+euclidean_vector_binary_operator_impl(const Vector &lhs, const Vector &rhs, std::index_sequence<I...>, Op) {
     return Vector{Op{}(get<I>(lhs), get<I>(rhs)) ...};
 }
 
 template<typename Vector, size_t ...I>
-constexpr
-typename Vector::scalar_type
+constexpr typename Vector::scalar_type
 euclidean_vector_inner_impl(const Vector &lhs, const Vector &rhs, std::index_sequence<I...>) {
     return ((get<I>(lhs) * get<I>(rhs)) + ...);
 }
 
 }
 
+template<typename T, size_t N>
+euclidean_vector<T, N> operator-(const euclidean_vector<T, N> &value) {
+    return detail::euclidean_vector_unary_operator_impl(value, std::make_index_sequence<N>{}, std::negate{});
 }
 
 #define MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(Op, Func) \
 template<typename T, size_t N> \
-misc::euclidean_vector<T, N> \
-operator Op (const misc::euclidean_vector<T, N> &lhs, const misc::euclidean_vector<T, N> &rhs) { \
-    return misc::detail::euclidean_vector_binary_operator_impl(lhs, rhs, Func{}, std::make_index_sequence<N>{}); \
+euclidean_vector<T, N> \
+operator Op (const euclidean_vector<T, N> &lhs, const euclidean_vector<T, N> &rhs) { \
+    return detail::euclidean_vector_binary_operator_impl(lhs, rhs, std::make_index_sequence<N>{}, Func{}); \
 } \
 template<typename T, size_t N> \
-misc::euclidean_vector<T, N> & \
-operator Op##=(misc::euclidean_vector<T, N> &lhs, const misc::euclidean_vector<T, N> &rhs) { \
+euclidean_vector<T, N> & \
+operator Op##=(euclidean_vector<T, N> &lhs, const euclidean_vector<T, N> &rhs) { \
     return lhs = lhs Op rhs; \
 }
 
@@ -101,6 +117,8 @@ MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(/, std::divides)
 #undef MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP
 
 template<typename T, size_t N>
-T dot(const misc::euclidean_vector<T, N> &lhs, const misc::euclidean_vector<T, N> &rhs) {
-    return misc::detail::euclidean_vector_inner_impl(lhs, rhs, std::make_index_sequence<N>{});
+T dot(const euclidean_vector<T, N> &lhs, const euclidean_vector<T, N> &rhs) {
+    return detail::euclidean_vector_inner_impl(lhs, rhs, std::make_index_sequence<N>{});
+}
+
 }
