@@ -23,7 +23,7 @@ public:
     explicit euclidean_vector(const Storage &storage) : m_storage(storage) {}
 
     template<typename ...Elems>
-    explicit euclidean_vector(Elems &&...elems) : m_storage{std::forward<Scalar>(elems) ...} {}
+    euclidean_vector(Elems &&...elems) : m_storage{std::forward<Scalar>(elems) ...} {}
 
     [[nodiscard]] constexpr size_t size() const { return dimension; }
 
@@ -34,6 +34,10 @@ public:
 private:
 
     storage_type m_storage{};
+
+public: // constants
+
+    // TODO: zero(), one(), up(), down(), left(), ...
 
 public: // ADLs
 
@@ -95,14 +99,14 @@ euclidean_vector<T, N> operator-(const euclidean_vector<T, N> &value) {
 }
 
 #define MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(Op, Func) \
-template<typename T, size_t N> \
-euclidean_vector<T, N> \
-operator Op (const euclidean_vector<T, N> &lhs, const euclidean_vector<T, N> &rhs) { \
+template<typename T1, typename T2, size_t N> \
+euclidean_vector<T1, N> \
+operator Op (const euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) { \
     return detail::euclidean_vector_binary_operator_impl(lhs, rhs, std::make_index_sequence<N>{}, Func{}); \
 } \
-template<typename T, size_t N> \
-euclidean_vector<T, N> & \
-operator Op##=(euclidean_vector<T, N> &lhs, const euclidean_vector<T, N> &rhs) { \
+template<typename T1, typename T2, size_t N> \
+euclidean_vector<T1, N> & \
+operator Op##=(euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) { \
     return lhs = lhs Op rhs; \
 }
 
@@ -117,7 +121,7 @@ MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(/, std::divides)
 #undef MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP
 
 template<typename T, size_t N>
-T dot(const euclidean_vector<T, N> &lhs, const euclidean_vector<T, N> &rhs) {
+T dot(const euclidean_vector <T, N> &lhs, const euclidean_vector <T, N> &rhs) {
     return detail::euclidean_vector_inner_impl(lhs, rhs, std::make_index_sequence<N>{});
 }
 
