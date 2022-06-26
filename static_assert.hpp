@@ -4,13 +4,10 @@
 
 namespace misc::detail {
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedTemplateParameterInspection"
 template<bool Cond, typename ...Ts>
 struct bool_constant_at_template_instantiation {
     static constexpr bool value = Cond;
 };
-#pragma clang diagnostic pop
 
 }
 

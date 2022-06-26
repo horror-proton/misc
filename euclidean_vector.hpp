@@ -37,7 +37,30 @@ private:
 
 public: // constants
 
-    // TODO: zero(), one(), up(), down(), left(), ...
+    static constexpr euclidean_vector zero() {
+        return constant_initializer_list(0, std::make_index_sequence<dimension>{});
+    }
+
+    static constexpr euclidean_vector one() {
+        return constant_initializer(1, std::make_index_sequence<dimension>{});
+    }
+
+    template<size_t D>
+    static constexpr euclidean_vector unit() {
+        return unit_initializer(std::make_index_sequence<D>{}, std::make_index_sequence<dimension - D - 1>{});
+    }
+
+private: // detail
+
+    template<size_t ...I>
+    static constexpr euclidean_vector
+    constant_initializer(scalar_type v, std::index_sequence<I...>) { return {(I, v) ...}; }
+
+    template<size_t ...Pre, size_t ...Post>
+    static constexpr euclidean_vector
+    unit_initializer(std::index_sequence<Pre...>, std::index_sequence<Post...>) {
+        return {(Pre, 0)..., 1, (Post, 0)...};
+    }
 
 public: // ADLs
 
@@ -74,20 +97,19 @@ namespace detail {
 
 template<typename Op, typename Vector, size_t ...I>
 constexpr Vector
-euclidean_vector_unary_operator_impl(
-        const Vector &value, std::index_sequence<I...>, Op) {
+euclidean_vector_unary_operator_impl(const Vector &value, Op, std::index_sequence<I...>) {
     return Vector{Op{}(get<I>(value)) ...};
 }
 
-template<typename Op, typename Vector, size_t ...I>
-constexpr Vector
-euclidean_vector_binary_operator_impl(const Vector &lhs, const Vector &rhs, std::index_sequence<I...>, Op) {
-    return Vector{Op{}(get<I>(lhs), get<I>(rhs)) ...};
+template<typename Op, typename Vector1, typename Vector2, size_t ...I>
+constexpr Vector1
+euclidean_vector_binary_operator_impl(const Vector1 &lhs, const Vector2 &rhs, Op, std::index_sequence<I...>) {
+    return {Op{}(get<I>(lhs), get<I>(rhs)) ...};
 }
 
-template<typename Vector, size_t ...I>
-constexpr typename Vector::scalar_type
-euclidean_vector_inner_impl(const Vector &lhs, const Vector &rhs, std::index_sequence<I...>) {
+template<typename Vector1, typename Vector2, size_t ...I>
+constexpr auto
+euclidean_vector_inner_impl(const Vector1 &lhs, const Vector2 &rhs, std::index_sequence<I...>) {
     return ((get<I>(lhs) * get<I>(rhs)) + ...);
 }
 
@@ -95,17 +117,17 @@ euclidean_vector_inner_impl(const Vector &lhs, const Vector &rhs, std::index_seq
 
 template<typename T, size_t N>
 euclidean_vector<T, N> operator-(const euclidean_vector<T, N> &value) {
-    return detail::euclidean_vector_unary_operator_impl(value, std::make_index_sequence<N>{}, std::negate{});
+    return detail::euclidean_vector_unary_operator_impl(value, std::negate{}, std::make_index_sequence<N>{});
 }
 
 #define MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(Op, Func) \
 template<typename T1, typename T2, size_t N> \
-euclidean_vector<T1, N> \
+constexpr auto \
 operator Op (const euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) { \
-    return detail::euclidean_vector_binary_operator_impl(lhs, rhs, std::make_index_sequence<N>{}, Func{}); \
+    return detail::euclidean_vector_binary_operator_impl(lhs, rhs, Func{}, std::make_index_sequence<N>{}); \
 } \
 template<typename T1, typename T2, size_t N> \
-euclidean_vector<T1, N> & \
+constexpr euclidean_vector<T1, N> & \
 operator Op##=(euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) { \
     return lhs = lhs Op rhs; \
 }
@@ -120,8 +142,8 @@ MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(/, std::divides)
 
 #undef MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP
 
-template<typename T, size_t N>
-T dot(const euclidean_vector <T, N> &lhs, const euclidean_vector <T, N> &rhs) {
+template<typename T1, typename T2, size_t N>
+auto dot(const euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) {
     return detail::euclidean_vector_inner_impl(lhs, rhs, std::make_index_sequence<N>{});
 }
 
