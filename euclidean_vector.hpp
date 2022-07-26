@@ -59,7 +59,7 @@ private: // detail
     template<size_t ...Pre, size_t ...Post>
     static constexpr euclidean_vector
     unit_initializer(std::index_sequence<Pre...>, std::index_sequence<Post...>) {
-        return {(Pre, 0)..., 1, (Post, 0)...};
+        return {(Pre, 0)..., 1, (Post, 0)...}; // FIXME: clang complaining left operand of comma operator has no effect
     }
 
 public: // ADLs

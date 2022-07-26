@@ -9,7 +9,16 @@ constexpr std::basic_string_view<char> type_name() {
 #ifdef MISC_CUSTOM_TYPE_NAME
     MISC_CUSTOM_TYPE_NAME
 #else
-#   ifdef __GNUC__
+#   ifdef __clang__
+    std::string_view result{__PRETTY_FUNCTION__};
+    result.remove_prefix(std::string_view{
+            "std::basic_string_view<char> misc::type_name() [T = "
+    }.size());
+    result.remove_suffix(std::string_view{
+            "]"
+    }.size());
+    return result;
+#   elif defined(__GNUC__)
     std::string_view result{__PRETTY_FUNCTION__};
     result.remove_prefix(std::string_view{
             "constexpr std::basic_string_view<char> misc::type_name() [with T = "
@@ -17,6 +26,7 @@ constexpr std::basic_string_view<char> type_name() {
     result.remove_suffix(std::string_view{
             "]"
     }.size());
+    return result;
 #   elif defined(_MSC_VER)
     std::string_view result{__FUNCSIG__};
     result.remove_prefix(std::string_view{
@@ -27,10 +37,10 @@ constexpr std::basic_string_view<char> type_name() {
     }.size());
     if (result.starts_with("struct ")) result.remove_prefix(7);
     else if (result.starts_with("class ")) result.remove_prefix(6);
+    return result;
 #   else
 #       error "not implemented, you might want to define MISC_CUSTOM_TYPE_NAME"
 #   endif
-    return result;
 #endif
 }
 
