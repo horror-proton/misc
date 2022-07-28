@@ -38,7 +38,7 @@ private:
 public: // constants
 
     static constexpr euclidean_vector zero() {
-        return constant_initializer_list(0, std::make_index_sequence<dimension>{});
+        return constant_initializer(0, std::make_index_sequence<dimension>{});
     }
 
     static constexpr euclidean_vector one() {
@@ -54,12 +54,12 @@ private: // detail
 
     template<size_t ...I>
     static constexpr euclidean_vector
-    constant_initializer(scalar_type v, std::index_sequence<I...>) { return {(I, v) ...}; }
+    constant_initializer(scalar_type v, std::index_sequence<I...>) { return {(scalar_type(I * 0) + v) ...}; }
 
     template<size_t ...Pre, size_t ...Post>
     static constexpr euclidean_vector
     unit_initializer(std::index_sequence<Pre...>, std::index_sequence<Post...>) {
-        return {(Pre, 0)..., 1, (Post, 0)...}; // FIXME: clang complaining left operand of comma operator has no effect
+        return {(Pre * 0)..., 1, (Post * 0)...};
     }
 
 public: // ADLs
