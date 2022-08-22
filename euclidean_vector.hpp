@@ -52,15 +52,22 @@ public: // constants
 
 private: // detail
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
     template<size_t ...I>
     static constexpr euclidean_vector
-    constant_initializer(scalar_type v, std::index_sequence<I...>) { return {(scalar_type(I * 0) + v) ...}; }
+    constant_initializer(scalar_type v, std::index_sequence<I...>) { return {(I, v) ...}; }
 
     template<size_t ...Pre, size_t ...Post>
     static constexpr euclidean_vector
     unit_initializer(std::index_sequence<Pre...>, std::index_sequence<Post...>) {
-        return {(Pre * 0)..., 1, (Post * 0)...};
+        return {(Pre, 0)..., 1, (Post, 0)...};
     }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 public: // ADLs
 
