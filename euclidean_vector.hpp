@@ -130,14 +130,14 @@ euclidean_vector<T, N> operator-(const euclidean_vector<T, N> &value) {
 #define MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(Op, Func) \
 template<typename T1, typename T2, size_t N> \
 constexpr auto \
-operator Op (const euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) { \
+operator Op (const euclidean_vector<T1, N, std::array<T1, N>> &lhs, const euclidean_vector<T2, N, std::array<T2, N>> &rhs) { \
     return detail::euclidean_vector_binary_operator_impl(lhs, rhs, Func{}, std::make_index_sequence<N>{}); \
 } \
 template<typename T1, typename T2, size_t N> \
 constexpr euclidean_vector<T1, N> & \
-operator Op##=(euclidean_vector<T1, N> &lhs, const euclidean_vector<T2, N> &rhs) { \
+operator Op##=(euclidean_vector<T1, N, std::array<T1, N>> &lhs, const euclidean_vector<T2, N, std::array<T2, N>> &rhs) { \
     return lhs = lhs Op rhs; \
-}
+} // MSVC fails to compile without std::array<T, N>
 
 MISC_EUCLIDEAN_VECTOR_DEFINE_DEFAULT_BINARY_OP(+, std::plus)
 
