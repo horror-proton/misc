@@ -34,7 +34,7 @@ constexpr std::basic_string_view<char> type_name() {
 #   elif defined(_MSC_VER)
     std::string_view result{__FUNCSIG__};
     result.remove_prefix(std::string_view{
-        "class std::basic_string_view<char,struct std::char_traits<char> > __cdecl type_name<"
+        "class std::basic_string_view<char,struct std::char_traits<char> > __cdecl misc::type_name<"
     }.size());
     result.remove_suffix(std::string_view{
         ">(void)"
