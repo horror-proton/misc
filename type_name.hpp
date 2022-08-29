@@ -54,10 +54,12 @@ inline std::string demangle(const char *name_from_typeid) {
 #ifndef _MSC_VER
     int status = 0;
     std::size_t size = 0;
-    const char *p = abi::__cxa_demangle(name_from_typeid, NULL, &size, &status); // NOLINT(modernize-use-nullptr)
+    char *p = abi::__cxa_demangle(name_from_typeid, NULL, &size, &status); // NOLINT(modernize-use-nullptr)
     if (!p)
         return name_from_typeid;
-    return p;
+    std::string result(p);
+    std::free(p);
+    return result;
 #else
     std::string result = name_from_typeid;
     if (result.substr(0, 6) == "class ")
