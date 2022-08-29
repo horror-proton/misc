@@ -50,13 +50,23 @@ constexpr std::basic_string_view<char> type_name() {
 #endif
 }
 
-inline std::string demangle(const char * name_from_typeid) {
+inline std::string demangle(const char *name_from_typeid) {
 #ifndef _MSC_VER
     int status = 0;
     std::size_t size = 0;
-    return abi::__cxa_demangle(name_from_typeid, NULL, &size, &status); // NOLINT(modernize-use-nullptr)
+    const char *p = abi::__cxa_demangle(name_from_typeid, NULL, &size, &status); // NOLINT(modernize-use-nullptr)
+    if (!p)
+        return name_from_typeid;
+    return p;
 #else
-    return name_from_typeid; // TODO: remove class struct enum prefixes
+    std::string result = name_from_typeid;
+    if (result.substr(0, 6) == "class ")
+        result = result.substr(6);
+    if (result.substr(0, 7) == "struct ")
+        result = result.substr(7);
+    if (result.substr(0, 5) == "enum ")
+        result = result.substr(5);
+    return result;
 #endif
 }
 
