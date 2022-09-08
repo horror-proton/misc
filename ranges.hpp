@@ -37,6 +37,8 @@ namespace misc
         inline constexpr remove_if_fn remove_if{};
     }
 
+    // TODO: https://stackoverflow.com/questions/48402558
+
     namespace views = ::ranges::views;
 }
 
@@ -44,10 +46,9 @@ namespace misc
 
 #include <ranges>
 
-namespace misc
-{
-    namespace ranges = std::ranges;
-    namespace views = std::views;
+namespace misc {
+namespace ranges = std::ranges;
+namespace views = std::views;
 }
 
 #elif defined(MISC_USE_RANGES_BOOST)
