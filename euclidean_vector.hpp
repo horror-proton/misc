@@ -45,8 +45,7 @@ public: // constants
         return constant_initializer(1, std::make_index_sequence<dimension>{});
     }
 
-    template<size_t D>
-    static constexpr euclidean_vector unit() {
+    template <size_t D> static constexpr euclidean_vector unit() {
         return unit_initializer(std::make_index_sequence<D>{}, std::make_index_sequence<dimension - D - 1>{});
     }
 
